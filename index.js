@@ -9,7 +9,7 @@ const symbolsString = 'AP,CTVA,DD,DOW,IFF,KL,NTR,NUE,PPG,CHTR,CMCSA,T,TMUS,VZ,AM
 const symbolsArray = symbolsString.toUpperCase().split(',')
 const outArray = []
 const dowTheory = excelToJson({
-    sourceFile: 'in/dowtheroy.xlsx',
+    sourceFile: '../dowtheroy.xlsx',
     header:{
         rows: 1
     },
@@ -29,7 +29,7 @@ const dowTheory = excelToJson({
 })['Sheet1'];
 
 const valueLine = excelToJson({
-    sourceFile: 'in/valueline.xlsx',
+    sourceFile: '../valueline.xlsx',
     columnToKey: {
         'A': 'Ticker',
         'B': 'Safety',
@@ -89,7 +89,7 @@ async function updateExcel(){
             }
         }
     });
-    await workbook.xlsx.writeFile('out/updated.xlsx');
+    await workbook.xlsx.writeFile('../updated.xlsx');
 
 }
 updateExcel()
