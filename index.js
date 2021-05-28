@@ -2,6 +2,8 @@
 const excelToJson = require('convert-excel-to-json');
 var json2xls = require('json2xls');
 const fs = require('fs');
+const Excel = require('exceljs');
+const { isRegExp } = require('util');
 
 const symbolsString = 'AP,CTVA,DD,DOW,IFF,KL,NTR,NUE,PPG,CHTR,CMCSA,T,TMUS,VZ,AMZN,BABA,BOOT,BWA,DBI,DIS,FOSL,GM,HD,LKQ,LOW,MCD,NFLX,PLCE,SBUX,TGT,ADM,CL,COST,GHC,GIS,K,KO,MO,NSRGY,PEP,PG,PM,TRMB,UL,WBA,WMT,BP,COP,CVX,ENB.TO,KMI,MPC,RDSB,VLO,XOM,AXP,BNS.TO,BRKB,HSBC,ICE,JPM,MA,MCO,PGR,PYPL,RY.TO,SCHW,SPGI,V,WFC,ABBV,ABT,AMGN,BMY,CVS,DHR,ISRG,JNJ,LLY,MDT,MRK,NVS,PFE,TMO,UNH,BA,CARR,CSX,DE,EMR,FDX,GD,ITW,LUV,MMM,MORN,NSC,OTIS,RTX,UAL,UNP,UPS,WEC,AAPL,ACN,ADBE,AKAM,AMAT,AMD,ANSS,ANTM,CSCO,FB,FTV,GLW,GOOG,HOLX,HPQ,IBM,INTC,MSFT,ORCL,QCOM,TXN,ZS,MLR,CNP,D,DNP,DUK,ED,EXC,LNT,NEE,SO,SRE'
 const symbolsArray = symbolsString.toUpperCase().split(',')
@@ -45,7 +47,8 @@ const valueLine = excelToJson({
 symbolsArray.forEach(symbol => {
     let dt;
     if(symbol.includes('.TO')){
-        dt = dowTheory.find( ({ Ticker }) => Ticker === symbol )
+        let symbolWithoutTO = symbol.replace('.TO','')
+        dt = dowTheory.find( ({ Ticker }) => Ticker === symbolWithoutTO )
     }else {
         dt = dowTheory.find( ({ Ticker }) => Ticker === symbol )
     }
@@ -55,4 +58,40 @@ symbolsArray.forEach(symbol => {
 });
 
 var xls = json2xls(outArray);
-fs.writeFileSync('out/stocks.xlsx', xls, 'binary');
+//fs.writeFileSync('out/stocks.xlsx', xls, 'binary');
+const alphabet = ' abcdefghijklmnopqrstuvwxyz'.toUpperCase().split('');
+
+async function updateExcel(){
+    const workbook = new Excel.Workbook();
+    await workbook.xlsx.readFile('in/old.xlsx');
+    const worksheet = workbook.worksheets[0];
+    const colMap = {}
+    let newValues = {}
+    worksheet.eachRow(function(row, rowNumber) {
+        newValues = {}
+        if(rowNumber === 1){
+            //console.log('Row ' + rowNumber + ' = ' + JSON.stringify(row.values));
+            for (let i = 1; i < row.values.length; i++) {
+                const element = row.values[i];
+                colMap[element] = {column: alphabet[i], index: i}
+            }
+            //console.log(JSON.stringify(colMap))
+            // console.log(JSON.stringify(outArray))
+        }else {
+            const ticker = row.values[colMap['Ticker'].index]
+            newValues = outArray.find(obj => obj['Ticker'] === ticker)
+            if(!newValues){
+                console.log(`NewValues ${JSON.stringify(newValues)} ${rowNumber} issue ${row.values[colMap['Ticker'].index]}`)
+            } else {
+                for (let key in newValues){
+                   // worksheet.getCell(`${colMap[key].column}${rowNumber}`).value = parseInt(newValues[key]) || newValues[key]
+                }
+            }
+        }
+    });
+    await workbook.xlsx.writeFile('out/updated.xlsx');
+
+}
+updateExcel()
+
+// console.log(JSON.stringify(outArray.find(obj => obj['Ticker'] === 'ZS')))
