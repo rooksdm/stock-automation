@@ -63,7 +63,7 @@ const alphabet = ' abcdefghijklmnopqrstuvwxyz'.toUpperCase().split('');
 
 async function updateExcel(){
     const workbook = new Excel.Workbook();
-    await workbook.xlsx.readFile('in/old.xlsx');
+    await workbook.xlsx.readFile('../../../old.xlsx');
     const worksheet = workbook.worksheets[0];
     const colMap = {}
     let newValues = {}
