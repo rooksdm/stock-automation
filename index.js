@@ -94,7 +94,7 @@ async function updateExcel(){
             }
         }
     });
-    await workbook.xlsx.writeFile('D:\\Projects\\rooksdm\\onedrive\\Rooksdm\\Projects - SB Financial - SB Financial\\Automation\\updated.xlsx');
+    await workbook.xlsx.writeFile(path+'\\updated.xlsx');
 
 }
 updateExcel()
